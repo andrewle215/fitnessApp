@@ -18,5 +18,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //Main things to add, using the built in health app to get calorie information and total steps that the user did
+    //using firebase to create the leaderboard system
 
 }
