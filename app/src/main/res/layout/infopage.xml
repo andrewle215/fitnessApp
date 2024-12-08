@@ -50,10 +50,11 @@
 
     <Button
         android:layout_width="wrap_content"
+        android:id="@+id/change_goal"
         android:layout_height="wrap_content"
         android:layout_below="@+id/leaderboard"
         android:layout_centerHorizontal="true"
         android:text="Change Goal"
         android:layout_marginTop="400dp"
-        ></Button>
+        />
 </RelativeLayout>

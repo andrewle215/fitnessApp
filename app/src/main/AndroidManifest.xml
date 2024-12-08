@@ -29,6 +29,9 @@
         <activity
             android:name=".InfoPage"
             android:exported="true" />
+
+        <activity android:name=".EditData"
+            android:exported="true"/>
     </application>
 
 </manifest>

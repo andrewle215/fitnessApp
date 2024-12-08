@@ -1,0 +1,70 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@color/black">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:contentDescription="App Logo" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Calorie Goal"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_below="@id/logo"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true" />
+
+<!--    <EditText-->
+<!--        android:id="@+id/calories_burned"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="Enter Calories Burned"-->
+<!--        android:background="@color/material_dynamic_neutral80"-->
+<!--        android:inputType="numberDecimal"-->
+<!--        android:padding="12dp"-->
+<!--        android:layout_below="@id/title"-->
+<!--        android:layout_marginTop="32dp" />-->
+
+    <EditText
+        android:id="@+id/goal_calories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Goal Calories"
+        android:background="@color/material_dynamic_neutral80"
+        android:inputType="numberDecimal"
+        android:padding="12dp"
+        android:layout_below="@id/title"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Changes"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_below="@id/goal_calories"
+        android:layout_marginTop="24dp" />
+
+    <TextView
+        android:id="@+id/td"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\@Andrew and Brendyn"
+        android:textSize="14sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
+
+</RelativeLayout>
