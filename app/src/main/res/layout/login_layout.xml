@@ -65,10 +65,13 @@
         android:id="@+id/td"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Andrew and Brendyn"
+        android:text="\@Andrew and Brendyn"
         android:textSize="14sp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        />
+
+
 
 </RelativeLayout>

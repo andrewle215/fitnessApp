@@ -21,6 +21,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".LoginPage"
+            android:exported="true" />
+
+        <activity
+            android:name=".InfoPage"
+            android:exported="true" />
     </application>
 
 </manifest>

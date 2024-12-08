@@ -1,35 +1,39 @@
 package com.example.finalproject
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 
-
 class LoginPage : AppCompatActivity() {
 
-    private lateinit var userName : EditText
-    private lateinit var button : Button
-    private lateinit var emailLogin : EditText
+    private lateinit var userName: EditText
+    private lateinit var emailLogin: EditText
+    private lateinit var button: Button
 
-    private fun getName() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.login_layout)
 
         userName = findViewById(R.id.name)
+        emailLogin = findViewById(R.id.email)
+        button = findViewById(R.id.loginButton)
 
+        getName()
+    }
 
+    private fun getName() {
         button.setOnClickListener {
             val name = userName.text.toString()
             val email = emailLogin.text.toString()
-
             if (validateInput(name, email)) {
                 saveUserData(name, email)
-  //              navigateToNextPage() // goes to another page need to work on this
+                navigateToInfo() // Navigate to InfoPage
             }
-
         }
     }
-
-
 
     private fun validateInput(name: String, email: String): Boolean {
         if (name.isEmpty()) {
@@ -44,7 +48,6 @@ class LoginPage : AppCompatActivity() {
             return false
         }
 
-
         return true
     }
 
@@ -58,5 +61,9 @@ class LoginPage : AppCompatActivity() {
         }
     }
 
-
+    private fun navigateToInfo() {
+        val intent = Intent(this, InfoPage::class.java)
+        startActivity(intent)
+        finish()
+    }
 }

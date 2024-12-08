@@ -52,6 +52,43 @@ class FitnessData(private val activity: Activity) {
     }
 
 
+    var totalCalories: Double = 0.0
+        private set
+
+    // Other existing methods...
+
+    fun fetchCalories() {
+        val calendar = Calendar.getInstance()
+        val endMillis = calendar.timeInMillis
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startMillis = calendar.timeInMillis
+
+        val readRequest = DataReadRequest.Builder()
+            .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
+            .bucketByTime(1, TimeUnit.DAYS)
+            .setTimeRange(startMillis, endMillis, TimeUnit.MILLISECONDS)
+            .build()
+
+        val account = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
+        Fitness.getHistoryClient(activity, account)
+            .readData(readRequest)
+            .addOnSuccessListener { response ->
+                totalCalories = response.buckets.flatMap { it.dataSets }.sumOf { dataSet ->
+                    dataSet.dataPoints.sumOf { it.getValue(Field.FIELD_CALORIES).asFloat().toDouble() }
+                }
+                Log.d("FitnessData", "Total Calories: $totalCalories")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FitnessData", "Failed to read calorie data", e)
+                totalCalories = 0.0
+            }
+    }
+
+
     private fun accessFitData() {
         val calendar = Calendar.getInstance()
         val endMillis = calendar.timeInMillis

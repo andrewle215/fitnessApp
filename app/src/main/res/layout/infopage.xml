@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:id="@+id/info"
+    >
+
+    <TextView
+        android:id="@+id/tv_calories_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calories Burned Today"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <ProgressBar
+        android:id="@+id/pb_calories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_calories_title"
+        android:layout_marginTop="25dp"
+        android:progress="100"
+        android:max="1600"
+        style="@android:style/Widget.ProgressBar.Horizontal" />
+
+    <TextView
+        android:id="@+id/tv_calories_burned"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1200 / 1600 calories burned"
+        android:layout_below="@id/pb_calories"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/leaderboard"
+        android:layout_below="@id/tv_calories_burned"
+        android:layout_centerHorizontal="true"
+
+        android:layout_marginTop="40dp"
+
+        android:textSize="16sp"
+        android:text="Leaderboard System"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/leaderboard"
+        android:layout_centerHorizontal="true"
+        android:text="Change Goal"
+        android:layout_marginTop="400dp"
+        ></Button>
+</RelativeLayout>
