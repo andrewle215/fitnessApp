@@ -23,6 +23,8 @@ class InfoPage : AppCompatActivity() {
         FirebaseDatabase.getInstance().reference.child("Users")
     }
 
+    private var userId: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.infopage)
@@ -32,6 +34,10 @@ class InfoPage : AppCompatActivity() {
         editDataButton = findViewById(R.id.change_goal)
         leaderboardContainer = findViewById(R.id.leaderboard_container)
 
+        // Retrieve userId from shared preferences
+        val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        userId = sharedPref.getString("userId", null)
+
         editDataButton.setOnClickListener {
             val intent = Intent(this, EditData::class.java)
             startActivity(intent)
@@ -40,18 +46,24 @@ class InfoPage : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updateGoalData()
+        updateProgressBar()
         fetchLeaderboardData()
     }
 
-    private fun updateGoalData() {
+    private fun updateProgressBar() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val goalCalories = sharedPref.getFloat("goalCalories", 0.0f)
+        val goalCalories = sharedPref.getFloat("goalCalories", 1600f) // Default goal: 1600
 
-        if (goalCalories > 0) {
-            progressBar.max = goalCalories.toInt()
-            progressBar.progress = 0
-            caloriesText.text = "0 / $goalCalories cal"
+        progressBar.max = goalCalories.toInt()
+
+        userId?.let { id ->
+            database.child(id).child("calories").get().addOnSuccessListener { snapshot ->
+                val calories = snapshot.getValue(Double::class.java) ?: 0.0
+                progressBar.progress = calories.toInt()
+                caloriesText.text = "${calories.toInt()} / ${goalCalories.toInt()} cal"
+            }.addOnFailureListener { e ->
+                Log.e("InfoPage", "Failed to fetch calories: ${e.message}")
+            }
         }
     }
 
