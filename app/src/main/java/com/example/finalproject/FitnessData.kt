@@ -2,16 +2,21 @@ package com.example.finalproject
 
 import android.app.Activity
 import android.content.Intent
-import android.icu.util.Calendar
 import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.fitness.request.DataReadRequest
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessOptions
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
-import java.time.ZonedDateTime
+import com.google.android.gms.fitness.request.DataDeleteRequest
+import com.google.android.gms.fitness.request.DataReadRequest
+import com.google.android.gms.fitness.data.DataPoint
+import com.google.android.gms.fitness.data.DataSet
+import com.google.android.gms.fitness.data.DataSource
 import java.util.concurrent.TimeUnit
+import android.icu.util.Calendar
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.firebase.database.FirebaseDatabase
 
 class FitnessData(private val activity: Activity) {
 
@@ -20,12 +25,14 @@ class FitnessData(private val activity: Activity) {
     }
 
     private val fitnessOptions = FitnessOptions.builder()
-        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
         .addDataType(DataType.TYPE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
+        .addDataType(DataType.TYPE_CALORIES_EXPENDED, FitnessOptions.ACCESS_WRITE)
         .build()
 
+    var totalCalories: Double = 0.0
+        private set
 
-    fun checkPermissionsAndSignIn() {
+    fun checkPermissionsAndSignIn(onSuccess: () -> Unit) {
         val account = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
         if (!GoogleSignIn.hasPermissions(account, fitnessOptions)) {
             GoogleSignIn.requestPermissions(
@@ -35,29 +42,27 @@ class FitnessData(private val activity: Activity) {
                 fitnessOptions
             )
         } else {
-            accessFitData()
+            Log.d("FitnessData", "Permissions already granted")
+            onSuccess()
         }
     }
 
-
-    fun handlePermissionsResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    fun handlePermissionsResult(requestCode: Int, resultCode: Int, data: Intent?, onSuccess: () -> Unit) {
         if (requestCode == REQUEST_OAUTH_REQUEST_CODE) {
             val account = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
             if (GoogleSignIn.hasPermissions(account, fitnessOptions)) {
-                accessFitData()
+                Log.d("FitnessData", "Permissions granted after user prompt")
+                onSuccess()
             } else {
-                Log.w("FitnessData", "Permissions not granted by the user.")
+                Log.e("FitnessData", "Permissions not granted by the user")
             }
         }
     }
 
+    private val googleSignInAccount: GoogleSignInAccount
+        get() = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
 
-    var totalCalories: Double = 0.0
-        private set
-
-    // Other existing methods...
-
-    fun fetchCalories() {
+    fun fetchCalories(userId: String) {
         val calendar = Calendar.getInstance()
         val endMillis = calendar.timeInMillis
 
@@ -73,23 +78,61 @@ class FitnessData(private val activity: Activity) {
             .setTimeRange(startMillis, endMillis, TimeUnit.MILLISECONDS)
             .build()
 
-        val account = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
-        Fitness.getHistoryClient(activity, account)
+        Fitness.getHistoryClient(activity, googleSignInAccount)
             .readData(readRequest)
             .addOnSuccessListener { response ->
-                totalCalories = response.buckets.flatMap { it.dataSets }.sumOf { dataSet ->
+                val fetchedCalories = response.buckets.flatMap { it.dataSets }.sumOf { dataSet ->
                     dataSet.dataPoints.sumOf { it.getValue(Field.FIELD_CALORIES).asFloat().toDouble() }
                 }
-                Log.d("FitnessData", "Total Calories: $totalCalories")
+
+                Log.d("FitnessData", "Fetched Calories: $fetchedCalories")
+
+                // Save fetched calories to Firebase or update in-app
+                totalCalories = fetchedCalories
+                val database = FirebaseDatabase.getInstance().getReference("Users")
+                database.child(userId).updateChildren(mapOf("calories" to totalCalories))
+                    .addOnSuccessListener {
+                        Log.d("FitnessData", "Calories successfully updated in Firebase for user: $userId")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FitnessData", "Failed to update calories in Firebase", e)
+                    }
             }
             .addOnFailureListener { e ->
-                Log.e("FitnessData", "Failed to read calorie data", e)
-                totalCalories = 0.0
+                Log.e("FitnessData", "Failed to fetch calorie data from Google Fit", e)
             }
     }
 
+    fun insertCaloriesData(onComplete: () -> Unit) {
+        val dataSource = DataSource.Builder()
+            .setAppPackageName(activity.packageName)
+            .setDataType(DataType.TYPE_CALORIES_EXPENDED)
+            .setType(DataSource.TYPE_RAW)
+            .build()
 
-    private fun accessFitData() {
+        val dataPoint = DataPoint.create(dataSource)
+            .setTimeInterval(
+                System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1),
+                System.currentTimeMillis(),
+                TimeUnit.MILLISECONDS
+            )
+        dataPoint.getValue(Field.FIELD_CALORIES).setFloat(200f)
+
+        val dataSet = DataSet.create(dataSource)
+        dataSet.add(dataPoint)
+
+        Fitness.getHistoryClient(activity, googleSignInAccount)
+            .insertData(dataSet)
+            .addOnSuccessListener {
+                Log.d("FitnessData", "Data successfully inserted into Google Fit.")
+                onComplete()
+            }
+            .addOnFailureListener { e ->
+                Log.e("FitnessData", "Failed to insert data into Google Fit", e)
+            }
+    }
+
+    fun resetCalories(onComplete: () -> Unit) {
         val calendar = Calendar.getInstance()
         val endMillis = calendar.timeInMillis
 
@@ -99,30 +142,20 @@ class FitnessData(private val activity: Activity) {
         calendar.set(Calendar.MILLISECOND, 0)
         val startMillis = calendar.timeInMillis
 
-        val readRequest = DataReadRequest.Builder()
-            .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
-            .aggregate(DataType.TYPE_CALORIES_EXPENDED, DataType.AGGREGATE_CALORIES_EXPENDED)
-            .bucketByTime(1, TimeUnit.DAYS)
-            .setTimeRange(startMillis, endMillis, TimeUnit.MILLISECONDS)
+        val request = DataDeleteRequest.Builder()
+            .setTimeInterval(startMillis, endMillis, TimeUnit.MILLISECONDS)
+            .addDataType(DataType.TYPE_CALORIES_EXPENDED)
             .build()
 
-        val account = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
-        Fitness.getHistoryClient(activity, account)
-            .readData(readRequest)
-            .addOnSuccessListener { response ->
-                val totalSteps = response.buckets.flatMap { it.dataSets }.sumOf { dataSet ->
-                    dataSet.dataPoints.sumOf { it.getValue(Field.FIELD_STEPS).asInt() }
-                }
-
-                val totalCalories = response.buckets.flatMap { it.dataSets }.sumOf { dataSet ->
-                    dataSet.dataPoints.sumOf { it.getValue(Field.FIELD_CALORIES).asFloat().toDouble() }
-                }
-
-                Log.d("GoogleFit", "Total Steps: $totalSteps")
-                Log.d("GoogleFit", "Total Calories: $totalCalories")
+        Fitness.getHistoryClient(activity, GoogleSignIn.getAccountForExtension(activity, fitnessOptions))
+            .deleteData(request)
+            .addOnSuccessListener {
+                Log.d("FitnessData", "Successfully deleted old calorie data.")
+                totalCalories = 0.0 // Reset in-app variable
+                onComplete()
             }
             .addOnFailureListener { e ->
-                Log.e("GoogleFit", "Failed to read data", e)
+                Log.e("FitnessData", "Failed to delete old calorie data", e)
             }
     }
 }

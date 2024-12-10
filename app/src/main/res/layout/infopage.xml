@@ -1,9 +1,9 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:id="@+id/info"
-    >
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/tv_calories_title"
@@ -29,32 +29,38 @@
         android:id="@+id/tv_calories_burned"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1200 / 1600 calories burned"
+        android:text="Goal Calories 0 Burned"
         android:layout_below="@id/pb_calories"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:textSize="16sp" />
 
     <TextView
+        android:id="@+id/leaderboard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/leaderboard"
+        android:text="Leaderboard System"
+        android:textSize="16sp"
         android:layout_below="@id/tv_calories_burned"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp" />
 
-        android:layout_marginTop="40dp"
-
-        android:textSize="16sp"
-        android:text="Leaderboard System"
-        />
+    <LinearLayout
+        android:id="@+id/leaderboard_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/leaderboard"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        android:padding="8dp" />
 
     <Button
-        android:layout_width="wrap_content"
         android:id="@+id/change_goal"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/leaderboard"
-        android:layout_centerHorizontal="true"
         android:text="Change Goal"
         android:layout_marginTop="400dp"
-        />
+        android:layout_below="@+id/leaderboard_container"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

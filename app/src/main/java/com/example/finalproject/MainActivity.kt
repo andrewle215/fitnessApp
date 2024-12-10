@@ -3,48 +3,65 @@ package com.example.finalproject
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.DatabaseReference
-
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var userName: EditText
     private lateinit var emailLogin: EditText
     private lateinit var button: Button
+    private lateinit var fitnessData: FitnessData
+    private var userId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.login_layout)
 
+        fitnessData = FitnessData(this)
 
-
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        fitnessData.checkPermissionsAndSignIn {
+            Log.d("MainActivity", "Google Fit permissions granted.")
         }
+
+
 
         userName = findViewById(R.id.name)
         emailLogin = findViewById(R.id.email)
         button = findViewById(R.id.loginButton)
 
         button.setOnClickListener {
-            val name = userName.text.toString()
-            val email = emailLogin.text.toString()
-            if (validateInput(name, email)) {
-                saveUserData(name, email)
-                navigateToInfo()
+            fitnessData.insertCaloriesData {
+                Log.d("MainActivity", "Calories inserted successfully.")
+                val name = userName.text.toString()
+                val email = emailLogin.text.toString()
+                if (validateInput(name, email)) {
+                    userId = saveUserDataLocal(name, email)
+                    saveUserToFirebase(name, email)
+
+                    fitnessData.checkPermissionsAndSignIn {
+                        fetchAndSaveCalories()
+                    }
+
+                    navigateToInfo()
+                }
             }
+
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        fitnessData.handlePermissionsResult(requestCode, resultCode, data) {
+            Log.d("MainActivity", "Google Fit permissions granted after user interaction.")
         }
     }
 
@@ -64,14 +81,42 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun saveUserData(name: String, email: String) {
+    private fun saveUserDataLocal(name: String, email: String): String {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val generatedUserId = email.replace(".", "_")
         with(sharedPref.edit()) {
             putString("userName", name)
             putString("userEmail", email)
-            putBoolean("isLoggedIn", true)
+            putString("userId", generatedUserId)
             apply()
         }
+        return generatedUserId
+    }
+
+    private fun saveUserToFirebase(name: String, email: String) {
+        val generatedUserId = userId ?: return
+
+        val user = mapOf(
+            "name" to name,
+            "email" to email,
+            "calories" to fitnessData.totalCalories
+        )
+
+        val database = FirebaseDatabase.getInstance().getReference("Users")
+        database.child(generatedUserId).setValue(user)
+            .addOnSuccessListener {
+                Toast.makeText(this, "User saved to Firebase!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Log.e("MainActivity", "Failed to save user to Firebase", it)
+                Toast.makeText(this, "Failed to save user to Firebase.", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+    private fun fetchAndSaveCalories() {
+        val generatedUserId = userId ?: return
+        fitnessData.fetchCalories(generatedUserId)
     }
 
     private fun navigateToInfo() {
@@ -79,17 +124,4 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
-    }
-
-    private fun switchToLoginLayout() {
-        val firebase: FirebaseDatabase = FirebaseDatabase.getInstance()
-        val ref1: DatabaseReference = firebase.getReference("Name")
-        val ref2: DatabaseReference = firebase.getReference("Email")
-        ref1.setValue("testing_name_works")
-        ref2.setValue("testing_email_works")
-    }
-
-    //Main things to add, using the built in health app to get calorie information and total steps that the user did
-    //using firebase to create the leaderboard system
-
+}
