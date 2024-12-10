@@ -54,12 +54,10 @@ class MainActivity : AppCompatActivity() {
                     fitnessData.checkPermissionsAndSignIn {
                         fetchAndSaveCalories()
                     }
-
-                    navigateToInfo()
                 }
             }
-
         }
+
 
         val adView: AdView = AdView(this)
         val adSize = AdSize(AdSize.FULL_WIDTH, AdSize.AUTO_HEIGHT)
@@ -74,6 +72,9 @@ class MainActivity : AppCompatActivity() {
 
         val adLayout: LinearLayout = findViewById(R.id.ad_view)
         adLayout.addView(adView)
+
+        adView.loadAd(request)
+
 
     }
 
@@ -135,8 +136,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchAndSaveCalories() {
         val generatedUserId = userId ?: return
-        fitnessData.fetchCalories(generatedUserId)
+        fitnessData.fetchCalories(generatedUserId) {
+            navigateToInfo()
+        }
     }
+
 
     private fun navigateToInfo() {
         val intent = Intent(this, InfoPage::class.java)

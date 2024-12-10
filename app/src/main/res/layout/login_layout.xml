@@ -14,7 +14,8 @@
         android:layout_height="100dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
-        android:contentDescription="App Logo" />
+        android:contentDescription="App Logo"
+        android:src="@mipmap/workout" />
 
     <TextView
         android:id="@+id/title"
@@ -74,10 +75,11 @@
 
     <LinearLayout
         android:id="@+id/ad_view"
+        android:layout_below="@id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center" />
+        android:gravity="bottom" />
 
 
 

@@ -62,7 +62,7 @@ class FitnessData(private val activity: Activity) {
     private val googleSignInAccount: GoogleSignInAccount
         get() = GoogleSignIn.getAccountForExtension(activity, fitnessOptions)
 
-    fun fetchCalories(userId: String) {
+    fun fetchCalories(userId: String, onComplete: () -> Unit) {
         val calendar = Calendar.getInstance()
         val endMillis = calendar.timeInMillis
 
@@ -87,21 +87,24 @@ class FitnessData(private val activity: Activity) {
 
                 Log.d("FitnessData", "Fetched Calories: $fetchedCalories")
 
-                // Save fetched calories to Firebase or update in-app
                 totalCalories = fetchedCalories
                 val database = FirebaseDatabase.getInstance().getReference("Users")
                 database.child(userId).updateChildren(mapOf("calories" to totalCalories))
                     .addOnSuccessListener {
                         Log.d("FitnessData", "Calories successfully updated in Firebase for user: $userId")
+                        onComplete()
                     }
                     .addOnFailureListener { e ->
                         Log.e("FitnessData", "Failed to update calories in Firebase", e)
+                        onComplete()
                     }
             }
             .addOnFailureListener { e ->
                 Log.e("FitnessData", "Failed to fetch calorie data from Google Fit", e)
+                onComplete()
             }
     }
+
 
     fun insertCaloriesData(onComplete: () -> Unit) {
         val dataSource = DataSource.Builder()

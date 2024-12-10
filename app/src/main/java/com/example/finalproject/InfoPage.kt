@@ -52,8 +52,7 @@ class InfoPage : AppCompatActivity() {
 
     private fun updateProgressBar() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val goalCalories = sharedPref.getFloat("goalCalories", 1600f) // Default goal: 1600
-
+        val goalCalories = sharedPref.getFloat("goalCalories", 1600f)
         progressBar.max = goalCalories.toInt()
 
         if (userId == null) {
@@ -61,23 +60,20 @@ class InfoPage : AppCompatActivity() {
             return
         }
 
-        Log.d("InfoPage", "Fetching calories for user ID: $userId")
-        database.child(userId!!).child("calories").get()
-            .addOnSuccessListener { snapshot ->
-                val calories = snapshot.getValue(Double::class.java) ?: 0.0
-                Log.d("InfoPage", "Fetched calories: $calories")
-
-                progressBar.progress = calories.toInt()
-                caloriesText.text = "${calories.toInt()} / ${goalCalories.toInt()} cal"
-
-                if (calories == 0.0) {
-                    Log.w("InfoPage", "Calories fetched from the database is 0.0. Check database entry.")
+        database.child(userId!!).child("calories")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val calories = snapshot.getValue(Double::class.java) ?: 0.0
+                    progressBar.progress = calories.toInt()
+                    caloriesText.text = "${calories.toInt()} / ${goalCalories.toInt()} cal"
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e("InfoPage", "Failed to fetch calories: ${e.message}")
-            }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("InfoPage", "Failed to fetch calories: ${error.message}")
+                }
+            })
     }
+
 
 
     private fun fetchLeaderboardData() {

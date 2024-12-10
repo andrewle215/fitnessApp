@@ -3,7 +3,8 @@
     android:id="@+id/info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/black">
 
     <TextView
         android:id="@+id/tv_calories_title"
@@ -12,6 +13,7 @@
         android:text="Calories Burned Today"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp" />
 
@@ -23,6 +25,7 @@
         android:layout_marginTop="25dp"
         android:progress="100"
         android:max="1600"
+        android:progressTint="@color/blue"
         style="@android:style/Widget.ProgressBar.Horizontal" />
 
     <TextView
@@ -30,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Goal Calories 0 Burned"
+        android:textColor="@color/white"
         android:layout_below="@id/pb_calories"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
@@ -40,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Leaderboard System"
+        android:textColor="@color/white"
         android:textSize="16sp"
         android:layout_below="@id/tv_calories_burned"
         android:layout_centerHorizontal="true"
@@ -49,11 +54,12 @@
         android:id="@+id/leaderboard_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/leaderboard"
         android:layout_above="@id/change_goal"
+        android:layout_below="@id/leaderboard"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="15dp"
         android:orientation="vertical"
-        android:padding="8dp"
-        android:layout_marginBottom="16dp" />
+        android:padding="8dp" />
 
     <Button
         android:id="@+id/change_goal"
@@ -62,6 +68,8 @@
         android:text="Change Goal"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:textColor="@color/white"
+        android:backgroundTint="#03A9F4" />
 
 </RelativeLayout>
