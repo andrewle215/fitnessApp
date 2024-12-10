@@ -6,11 +6,15 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
@@ -56,6 +60,21 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+
+        val adView: AdView = AdView(this)
+        val adSize = AdSize(AdSize.FULL_WIDTH, AdSize.AUTO_HEIGHT)
+        adView.setAdSize(adSize)
+
+        val adUnitId: String = "ca-app-pub-3940256099942544/6300978111"
+        adView.adUnitId = adUnitId
+
+        val builder: AdRequest.Builder = AdRequest.Builder()
+        builder.addKeyword("workout").addKeyword("fitness")
+        val request: AdRequest = builder.build()
+
+        val adLayout: LinearLayout = findViewById(R.id.ad_view)
+        adLayout.addView(adView)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
