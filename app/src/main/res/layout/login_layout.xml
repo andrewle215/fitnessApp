@@ -72,6 +72,13 @@
         android:layout_marginBottom="16dp"
         />
 
+    <LinearLayout
+        android:id="@+id/ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center" />
+
 
 
 </RelativeLayout>
