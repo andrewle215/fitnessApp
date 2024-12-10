@@ -56,16 +56,29 @@ class InfoPage : AppCompatActivity() {
 
         progressBar.max = goalCalories.toInt()
 
-        userId?.let { id ->
-            database.child(id).child("calories").get().addOnSuccessListener { snapshot ->
+        if (userId == null) {
+            Log.e("InfoPage", "User ID is null. Cannot fetch progress.")
+            return
+        }
+
+        Log.d("InfoPage", "Fetching calories for user ID: $userId")
+        database.child(userId!!).child("calories").get()
+            .addOnSuccessListener { snapshot ->
                 val calories = snapshot.getValue(Double::class.java) ?: 0.0
+                Log.d("InfoPage", "Fetched calories: $calories")
+
                 progressBar.progress = calories.toInt()
                 caloriesText.text = "${calories.toInt()} / ${goalCalories.toInt()} cal"
-            }.addOnFailureListener { e ->
+
+                if (calories == 0.0) {
+                    Log.w("InfoPage", "Calories fetched from the database is 0.0. Check database entry.")
+                }
+            }
+            .addOnFailureListener { e ->
                 Log.e("InfoPage", "Failed to fetch calories: ${e.message}")
             }
-        }
     }
+
 
     private fun fetchLeaderboardData() {
         database.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -84,14 +97,41 @@ class InfoPage : AppCompatActivity() {
                 leaderboardContainer.removeAllViews()
 
                 for ((index, user) in topUsers.withIndex()) {
-                    val textView = TextView(this@InfoPage)
-                    textView.textSize = 16f
-                    textView.text = "${index + 1}. ${user.name} - ${user.calories} cal"
-                    textView.layoutParams = LinearLayout.LayoutParams(
-                        LayoutParams.WRAP_CONTENT,
-                        LayoutParams.WRAP_CONTENT
-                    )
-                    leaderboardContainer.addView(textView)
+                    // Create a container for each entry
+                    val entryContainer = LinearLayout(this@InfoPage).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setPadding(16, 16, 16, 16)
+                        layoutParams = LinearLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT,
+                            LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            setMargins(8, 8, 8, 8) // Margin between leaderboard entries
+                        }
+                        setBackgroundResource(android.R.drawable.dialog_holo_light_frame) // Border around entry
+                    }
+
+                    // Add rank and name
+                    val rankAndName = TextView(this@InfoPage).apply {
+                        text = "${index + 1}. ${user.name}"
+                        textSize = 18f
+                        setPadding(8, 4, 8, 4)
+                        setTextColor(resources.getColor(android.R.color.holo_blue_dark, theme))
+                    }
+
+                    // Add calories
+                    val caloriesText = TextView(this@InfoPage).apply {
+                        text = "Calories Burned: ${user.calories.toInt()} cal"
+                        textSize = 16f
+                        setPadding(8, 4, 8, 4)
+                        setTextColor(resources.getColor(android.R.color.black, theme))
+                    }
+
+                    // Add both views to the entry container
+                    entryContainer.addView(rankAndName)
+                    entryContainer.addView(caloriesText)
+
+                    // Add the entry container to the leaderboard
+                    leaderboardContainer.addView(entryContainer)
                 }
             }
 
@@ -100,6 +140,7 @@ class InfoPage : AppCompatActivity() {
             }
         })
     }
+
 
     data class UserData(
         val name: String,

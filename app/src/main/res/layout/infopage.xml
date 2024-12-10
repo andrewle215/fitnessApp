@@ -50,17 +50,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/leaderboard"
-        android:layout_marginTop="16dp"
+        android:layout_above="@id/change_goal"
         android:orientation="vertical"
-        android:padding="8dp" />
+        android:padding="8dp"
+        android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/change_goal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Change Goal"
-        android:layout_marginTop="400dp"
-        android:layout_below="@+id/leaderboard_container"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
 
 </RelativeLayout>
