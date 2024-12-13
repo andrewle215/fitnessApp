@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.login_layout)
 
         fitnessData = FitnessData(this)
-//        fitnessData.resetCalories {  }
+        fitnessData.resetCalories {  }
         fitnessData.checkPermissionsAndSignIn {
             Log.d("MainActivity", "Google Fit permissions granted.")
         }

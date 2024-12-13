@@ -34,7 +34,6 @@ class InfoPage : AppCompatActivity() {
         editDataButton = findViewById(R.id.change_goal)
         leaderboardContainer = findViewById(R.id.leaderboard_container)
 
-        // Retrieve userId from shared preferences
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         userId = sharedPref.getString("userId", null)
 
@@ -93,7 +92,6 @@ class InfoPage : AppCompatActivity() {
                 leaderboardContainer.removeAllViews()
 
                 for ((index, user) in topUsers.withIndex()) {
-                    // Create a container for each entry
                     val entryContainer = LinearLayout(this@InfoPage).apply {
                         orientation = LinearLayout.VERTICAL
                         setPadding(16, 16, 16, 16)
@@ -101,12 +99,11 @@ class InfoPage : AppCompatActivity() {
                             LayoutParams.MATCH_PARENT,
                             LayoutParams.WRAP_CONTENT
                         ).apply {
-                            setMargins(8, 8, 8, 8) // Margin between leaderboard entries
+                            setMargins(8, 8, 8, 8)
                         }
-                        setBackgroundResource(android.R.drawable.dialog_holo_light_frame) // Border around entry
+                        setBackgroundResource(android.R.drawable.dialog_holo_light_frame)
                     }
 
-                    // Add rank and name
                     val rankAndName = TextView(this@InfoPage).apply {
                         text = "${index + 1}. ${user.name}"
                         textSize = 18f
@@ -114,7 +111,6 @@ class InfoPage : AppCompatActivity() {
                         setTextColor(resources.getColor(android.R.color.holo_blue_dark, theme))
                     }
 
-                    // Add calories
                     val caloriesText = TextView(this@InfoPage).apply {
                         text = "Calories Burned: ${user.calories.toInt()} cal"
                         textSize = 16f
@@ -122,11 +118,9 @@ class InfoPage : AppCompatActivity() {
                         setTextColor(resources.getColor(android.R.color.black, theme))
                     }
 
-                    // Add both views to the entry container
                     entryContainer.addView(rankAndName)
                     entryContainer.addView(caloriesText)
 
-                    // Add the entry container to the leaderboard
                     leaderboardContainer.addView(entryContainer)
                 }
             }
